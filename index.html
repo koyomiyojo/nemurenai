@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>疲れが抜けないよ〜 脳の寝不足セルフチェック</title>
+    <!-- Tailwind CSS (スタイリング用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'bg-cream': '#FAF6F0',
+              'lavender-soft': '#F3E8FF',
+              'lavender-border': '#DDD6FE',
+              'lavender-main': '#7C3AED',
+              'lavender-dark': '#5B21B6',
+              'sky-soft': '#E0F2FE',
+              'sky-border': '#BAE6FD',
+              'sky-main': '#0284C7',
+            },
+            fontFamily: {
+              sans: ['"Hiragino Kaku Gothic ProN"', '"Hiragino Sans"', 'Meiryo', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* タッチ操作向上のためのスムースアニメーション */
+      .fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      /* ボタンの押し心地 */
+      .btn-bounce:active {
+        transform: scale(0.97);
+      }
+    </style>
+</head>
+<body class="bg-bg-cream text-gray-800 font-sans min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 select-none">
+
+    <!-- メインコンテンツラッパー -->
+    <main class="w-full max-w-lg mx-auto my-auto py-4">
+
+        <!-- キャラクター画像エリア -->
+        <div class="mb-6 text-center">
+            <div class="relative inline-block w-full max-w-xs sm:max-w-sm">
+                <!-- 指定画像 sleep-check-characters.png -->
+                <img id="char-img" 
+                     src="sleep-check-characters.png" 
+                     alt="疲れた相談者と答える先生" 
+                     class="w-full h-auto rounded-3xl shadow-md border-4 border-white object-cover mx-auto"
+                     onerror="handleImageError()">
+                
+                <!-- 画像が見つからない場合の可愛いフォールバック枠 -->
+                <div id="img-fallback" class="hidden w-full py-6 px-4 bg-white/90 rounded-3xl shadow-md border-4 border-lavender-border text-center">
+                    <div class="text-5xl mb-2">😴 🩺</div>
+                    <p class="text-sm text-purple-700 font-bold">脳の寝不足セルフチェック</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. 最初の画面（スタート画面） -->
+        <section id="screen-start" class="bg-white rounded-3xl shadow-lg p-6 sm:p-8 border border-purple-100 text-center fade-in">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-purple-950 mb-2 leading-tight">
+                疲れが抜けないよ〜
+            </h1>
+            <p class="text-lg sm:text-xl font-bold text-sky-600 mb-6">
+                その疲れ、脳の寝不足かも？
+            </p>
+            
+            <div class="bg-purple-50/80 rounded-2xl p-4 sm:p-5 mb-8 text-left border border-purple-100">
+                <p class="text-base sm:text-lg text-gray-700 leading-relaxed">
+                    4つの質問に答えて、今の眠りと疲れの傾向を振り返ってみましょう。
+                </p>
+            </div>
+
+            <button onclick="startCheck()" 
+                    class="btn-bounce w-full bg-lavender-main hover:bg-lavender-dark text-white font-bold text-xl sm:text-2xl py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2">
+                <span>チェックを始める</span>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </button>
+        </section>
+
+        <!-- 2. 質問画面 -->
+        <section id="screen-question" class="hidden bg-white rounded-3xl shadow-lg p-6 sm:p-8 border border-purple-100 text-center fade-in">
+            <!-- 進行バー -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="question-step" class="text-base font-bold text-lavender-main">第 1 問 / 全 4 問</span>
+                    <span id="progress-text" class="text-sm font-semibold text-gray-500">25%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-3.5 overflow-hidden p-0.5 border border-gray-200">
+                    <div id="progress-bar" class="bg-gradient-to-r from-sky-400 to-lavender-main h-full rounded-full transition-all duration-300" style="width: 25%"></div>
+                </div>
+            </div>
+
+            <!-- 質問文 -->
+            <div class="min-h-[140px] flex items-center justify-center bg-sky-50/60 rounded-2xl p-6 mb-8 border border-sky-100">
+                <p id="question-text" class="text-xl sm:text-2xl font-bold text-gray-800 leading-snug">
+                    質問内容がここに入ります
+                </p>
+            </div>
+
+            <!-- 回答ボタン -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button onclick="answerQuestion(true)" 
+                        class="btn-bounce w-full bg-sky-main hover:bg-sky-700 text-white font-bold text-2xl py-4 px-6 rounded-2xl shadow-md transition-all duration-200 flex items-center justify-center gap-2">
+                    <span>はい</span>
+                </button>
+                <button onclick="answerQuestion(false)" 
+                        class="btn-bounce w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-2xl py-4 px-6 rounded-2xl shadow border border-gray-300 transition-all duration-200 flex items-center justify-center gap-2">
+                    <span>いいえ</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. 結果画面 -->
+        <section id="screen-result" class="hidden bg-white rounded-3xl shadow-lg p-6 sm:p-8 border border-purple-100 fade-in">
+            <div class="text-center mb-6">
+                <span class="inline-block bg-purple-100 text-lavender-dark font-bold text-sm px-4 py-1.5 rounded-full mb-2">診断結果</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">あなたの今の傾向</h2>
+            </div>
+
+            <!-- 該当する結果タイプを表示するリスト -->
+            <div id="result-list" class="space-y-4 mb-6">
+                <!-- JavaScriptで結果カードを動的に挿入 -->
+            </div>
+
+            <!-- 共通メッセージ -->
+            <div class="bg-amber-50 rounded-2xl p-4 sm:p-5 mb-8 border border-amber-200">
+                <p class="text-sm sm:text-base text-amber-900 leading-relaxed font-medium">
+                    ※これは病気を診断するものではありません。強い疲れ、日中の強い眠気、いびきや息苦しさ、不調が長く続く場合は、医療機関へご相談ください。
+                </p>
+            </div>
+
+            <!-- 操作ボタン群 -->
+            <div class="space-y-3">
+                <!-- もう一度チェックする -->
+                <button onclick="restartCheck()" 
+                        class="btn-bounce w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-lg sm:text-xl py-3.5 px-6 rounded-2xl shadow border border-gray-300 transition-all duration-200 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span>もう一度チェックする</span>
+                </button>
+
+                <!-- 健康相談LINEへ -->
+                <button onclick="openLineUrl()" 
+                        class="btn-bounce w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-bold text-lg sm:text-xl py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2">
+                    <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 5.82 2 10.53c0 4.21 3.54 7.74 8.31 8.41.32.07.76.21.87.49.1.25.07.64.03.9-.06.38-.28 1.48-.3 1.8-.04.47-.22 1.84.81 1.01 1.03-.83 5.56-3.28 7.59-5.61C21.1 15.53 22 13.16 22 10.53 22 5.82 17.52 2 12 2z"/>
+                    </svg>
+                    <span>健康相談LINEへ</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center text-xs sm:text-sm text-gray-500 py-4">
+        <p>© 脳の寝不足セルフチェック</p>
+    </footer>
+
+    <!-- カスタム案内ダイアログ（LINE未設定用） -->
+    <div id="notice-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl border border-purple-100 fade-in">
+            <div class="text-4xl mb-3">💬</div>
+            <h3 id="modal-title" class="text-xl font-bold text-gray-800 mb-2">ご案内</h3>
+            <p id="modal-message" class="text-base text-gray-600 mb-6">LINEのご案内は準備中です</p>
+            <button onclick="closeModal()" class="w-full bg-lavender-main hover:bg-lavender-dark text-white font-bold text-lg py-3 rounded-xl transition-all">
+                閉じる
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /***********************************************************
+         * 設定項目
+         * LINEのURLを設定する場合は、下記の変数にURLを入力してください。
+         * 例: const LINE_URL = "https://line.me/R/ti/p/@example";
+         ***********************************************************/
+        const LINE_URL = "ここに健康相談LINEのURLを入れる";
+
+        // 質問データの定義
+        const questions = [
+            "朝起きた時から、疲れが残っている",
+            "昼間ぼんやりして、集中できないことがある",
+            "なんとなく疲れていて、ほんのりだるい",
+            "時々、夜中に目が覚めてしまう"
+        ];
+
+        // ユーザーの回答記録（true: はい / false: いいえ）
+        let userAnswers = [];
+        let currentQuestionIndex = 0;
+
+        // 画像読み込みエラー処理
+        function handleImageError() {
+            document.getElementById('char-img').classList.add('hidden');
+            document.getElementById('img-fallback').classList.remove('hidden');
+        }
+
+        // チェック開始
+        function startCheck() {
+            userAnswers = [];
+            currentQuestionIndex = 0;
+            showScreen('screen-question');
+            renderQuestion();
+        }
+
+        // 質問の描画
+        function renderQuestion() {
+            const stepNum = currentQuestionIndex + 1;
+            const total = questions.length;
+            const progressPercent = (stepNum / total) * 100;
+
+            document.getElementById('question-step').textContent = `第 ${stepNum} 問 / 全 ${total} 問`;
+            document.getElementById('progress-text').textContent = `${Math.round(progressPercent)}%`;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+            document.getElementById('question-text').textContent = questions[currentQuestionIndex];
+        }
+
+        // 回答選択処理
+        function answerQuestion(isYes) {
+            userAnswers.push(isYes);
+            
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                // すべて回答完了 -> 判定画面へ
+                showResults();
+            }
+        }
+
+        // 結果計算と表示
+        function showResults() {
+            const q1 = userAnswers[0];
+            const q2 = userAnswers[1];
+            const q3 = userAnswers[2];
+            const q4 = userAnswers[3];
+            
+            const yesCount = userAnswers.filter(ans => ans === true).length;
+            const resultListEl = document.getElementById('result-list');
+            resultListEl.innerHTML = '';
+
+            const matchedTypes = [];
+
+            // 判定条件1：質問1 または 質問4 が「はい」
+            if (q1 || q4) {
+                matchedTypes.push({
+                    title: "眠りが浅くなっているかも",
+                    colorClass: "border-sky-200 bg-sky-50/70 text-sky-900",
+                    badgeColor: "bg-sky-500 text-white",
+                    message: "夜は照明を少し暗くして、眠る前にゆっくり深呼吸しましょう。途中で目が覚めても、時計を何度も確認しないことがおすすめです。"
+                });
+            }
+
+            // 判定条件2：質問2 または 質問3 が「はい」
+            if (q2 || q3) {
+                matchedTypes.push({
+                    title: "脳が十分に休めていないかも",
+                    colorClass: "border-purple-200 bg-purple-50/70 text-purple-900",
+                    badgeColor: "bg-lavender-main text-white",
+                    message: "何もしない時間を5分つくり、目と頭を休ませましょう。寝る前はスマートフォンから少し離れてみましょう。"
+                });
+            }
+
+            // 判定条件3：「はい」が3問以上
+            if (yesCount >= 3) {
+                matchedTypes.push({
+                    title: "生活リズムやホルモンバランスの影響も考えられます",
+                    colorClass: "border-indigo-200 bg-indigo-50/70 text-indigo-900",
+                    badgeColor: "bg-indigo-600 text-white",
+                    message: "起きる時間と食事の時間をなるべく一定にして、朝の光を浴びましょう。疲れが長く続く場合は、無理をせず医療機関に相談してください。"
+                });
+            }
+
+            // 判定条件4：すべて「いいえ」（はい が 0個）
+            if (yesCount === 0) {
+                matchedTypes.push({
+                    title: "今のところ、睡眠による強い疲れは少なそうです",
+                    colorClass: "border-emerald-200 bg-emerald-50/70 text-emerald-900",
+                    badgeColor: "bg-emerald-600 text-white",
+                    message: "今の生活リズムを大切にしましょう。疲れを感じた日は、早めに休むことを心がけてください。"
+                });
+            }
+
+            // 結果カードを生成して画面に表示
+            matchedTypes.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = `p-5 rounded-2xl border ${item.colorClass} shadow-sm`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="inline-block px-3 py-0.5 text-xs font-bold rounded-full ${item.badgeColor}">チェック項目</span>
+                        <h3 class="text-xl font-bold">${item.title}</h3>
+                    </div>
+                    <p class="text-base leading-relaxed font-medium text-gray-800">${item.message}</p>
+                `;
+                resultListEl.appendChild(card);
+            });
+
+            showScreen('screen-result');
+        }
+
+        // もう一度チェックする
+        function restartCheck() {
+            startCheck();
+        }
+
+        // LINEボタンのクリック処理
+        function openLineUrl() {
+            // URLが初期値または空、もしくは不正な場合
+            if (!LINE_URL || LINE_URL.trim() === "" || LINE_URL.includes("ここに健康相談LINEのURLを入れる")) {
+                showModal("ご案内", "LINEのご案内は準備中です");
+            } else {
+                window.open(LINE_URL, '_blank', 'noopener,noreferrer');
+            }
+        }
+
+        // 画面切り替えユーティリティ
+        function showScreen(screenId) {
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-question').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+
+            const target = document.getElementById(screenId);
+            target.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // モーダル表示
+        function showModal(title, msg) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = msg;
+            document.getElementById('notice-modal').classList.remove('hidden');
+        }
+
+        // モーダル非表示
+        function closeModal() {
+            document.getElementById('notice-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
